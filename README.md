@@ -8,6 +8,10 @@ HRM executes sequential reasoning tasks in a single forward pass without explici
 Furthermore, HRM outperforms much larger models with significantly longer context windows on the Abstraction and Reasoning Corpus (ARC), a key benchmark for measuring artificial general intelligence capabilities.
 These results underscore HRM’s potential as a transformative advancement toward universal computation and general-purpose reasoning systems.
 
+## RSI-Extended HRM (Algodonic)
+
+We extend HRM with an explicit algedonic channel (Beer, VSM): a drift monitor (VaneLayer) computes a stability score from entropy, loss deltas, and backtrack density; an S3* audit triggers interrupts when drift spikes, forcing plan repair and softly resetting the executor. Across adversarial mazes, noisy Sudoku, and ARC distractors, algedonic control reduces dead-end traversal and improves recovery latency at equal compute. Ablations removing Vane/S3* collapse these gains, indicating the contribution is structural—not cosmetic.
+
 **Join our Discord Community: [https://discord.gg/sapient](https://discord.gg/sapient)**
 
 
