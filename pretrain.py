@@ -21,6 +21,7 @@ from adam_atan2 import AdamATan2
 from puzzle_dataset import PuzzleDataset, PuzzleDatasetConfig, PuzzleDatasetMetadata
 from utils.functions import load_model_class, get_model_source_path
 from models.sparse_embedding import CastedSparseEmbeddingSignSGD_Distributed
+import torch.nn.functional as F
 
 
 class LossConfig(pydantic.BaseModel):
@@ -220,7 +221,29 @@ def train_batch(config: PretrainConfig, train_state: TrainState, batch: Any, glo
             train_state.carry = train_state.model.initial_carry(batch)  # type: ignore
 
     # Forward
-    train_state.carry, loss, metrics, _, _ = train_state.model(carry=train_state.carry, batch=batch, return_keys=[])
+    labels = batch.get("labels")
+    step_loss_fn = None
+    if labels is not None:
+        def step_loss_fn(logits, labels=labels, t=0):
+            y = labels[t]
+            if y.ndim > 1:
+                y = y.squeeze(-1)
+            return F.cross_entropy(logits, y, reduction='none')
+    env_backtrack = batch.get("env_backtrack")
+    try:
+        train_state.carry, loss, metrics, _, _ = train_state.model(
+            carry=train_state.carry,
+            batch=batch,
+            return_keys=[],
+            step_loss_fn=step_loss_fn,
+            env_backtrack=env_backtrack,
+        )
+    except TypeError:
+        train_state.carry, loss, metrics, _, _ = train_state.model(
+            carry=train_state.carry,
+            batch=batch,
+            return_keys=[],
+        )
 
     ((1 / global_batch_size) * loss).backward()
 
@@ -282,8 +305,21 @@ def evaluate(config: PretrainConfig, train_state: TrainState, eval_loader: torch
 
             # Forward
             while True:
-                carry, _, metrics, preds, all_finish = train_state.model(carry=carry, batch=batch, return_keys=config.eval_save_outputs)
-                
+                try:
+                    carry, _, metrics, preds, all_finish = train_state.model(
+                        carry=carry,
+                        batch=batch,
+                        return_keys=config.eval_save_outputs,
+                        step_loss_fn=None,
+                        env_backtrack=batch.get("env_backtrack"),
+                    )
+                except TypeError:
+                    carry, _, metrics, preds, all_finish = train_state.model(
+                        carry=carry,
+                        batch=batch,
+                        return_keys=config.eval_save_outputs,
+                    )
+
                 if all_finish:
                     break
 
