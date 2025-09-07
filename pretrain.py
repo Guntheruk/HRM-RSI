@@ -16,7 +16,12 @@ import coolname
 import hydra
 import pydantic
 from omegaconf import DictConfig
-from adam_atan2 import AdamATan2
+import warnings
+try:
+    from adam_atan2 import AdamATan2  # type: ignore
+except Exception:
+    from torch.optim import Adam as AdamATan2
+    warnings.warn("adam_atan2_backend not found; falling back to torch.optim.Adam")
 
 from puzzle_dataset import PuzzleDataset, PuzzleDatasetConfig, PuzzleDatasetMetadata
 from utils.functions import load_model_class, get_model_source_path
