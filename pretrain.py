@@ -16,7 +16,12 @@ import coolname
 import hydra
 import pydantic
 from omegaconf import DictConfig
-from adam_atan2 import AdamATan2
+import warnings
+try:
+    from adam_atan2 import AdamATan2  # type: ignore
+except Exception:
+    from torch.optim import Adam as AdamATan2
+    warnings.warn("adam_atan2_backend not found; falling back to torch.optim.Adam")
 
 from puzzle_dataset import PuzzleDataset, PuzzleDatasetConfig, PuzzleDatasetMetadata
 from utils.functions import load_model_class, get_model_source_path
@@ -226,6 +231,11 @@ def train_batch(config: PretrainConfig, train_state: TrainState, batch: Any, glo
     if labels is not None:
         def step_loss_fn(logits, labels=labels, t=0):
             y = labels[t]
+ codex/add-rsi-vanelayer-and-s3-interrupt-to-hrm
+            if y.ndim > 1:
+                y = y.squeeze(-1)
+=======
+ main
             return F.cross_entropy(logits, y, reduction='none')
     env_backtrack = batch.get("env_backtrack")
     try:

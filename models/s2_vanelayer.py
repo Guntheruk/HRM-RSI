@@ -49,6 +49,10 @@ class VaneLayer:
             b = self.beta
             self._ema  = b*self._ema  + (1-b)*m
             self._ema2 = b*self._ema2 + (1-b)*(m*m)
+ codex/add-rsi-vanelayer-and-s3-interrupt-to-hrm
+        var = (self._ema2 - self._ema*self._ema).clamp_min(1e-6)
+=======
         var = (self._ema2 - self._ema*self._ema).clamp_min(1e-9)
+ main
         std = var.sqrt()
         return s, self._ema.detach(), std.detach()
