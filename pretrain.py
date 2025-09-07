@@ -231,8 +231,11 @@ def train_batch(config: PretrainConfig, train_state: TrainState, batch: Any, glo
     if labels is not None:
         def step_loss_fn(logits, labels=labels, t=0):
             y = labels[t]
+ codex/add-rsi-vanelayer-and-s3-interrupt-to-hrm
             if y.ndim > 1:
                 y = y.squeeze(-1)
+=======
+ main
             return F.cross_entropy(logits, y, reduction='none')
     env_backtrack = batch.get("env_backtrack")
     try:

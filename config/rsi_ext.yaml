@@ -5,6 +5,8 @@ vanelayer:
   use_entropy: true
   use_loss_delta: true
   use_backtrack: true
+=======
+  hysteresis: true
 s3star:
   enabled: true
   tau_high_sigma: 1.2
@@ -14,3 +16,4 @@ s3star:
   force_hi_update: true
   hysteresis: true
 
+=======

@@ -12,10 +12,12 @@ These results underscore HRM’s potential as a transformative advancement towar
 
 We extend HRM with an explicit algedonic channel (Beer, VSM): a drift monitor (VaneLayer) computes a stability score from entropy, loss deltas, and backtrack density; an S3* audit triggers interrupts when drift spikes, forcing plan repair and softly resetting the executor. Across adversarial mazes, noisy Sudoku, and ARC distractors, algedonic control reduces dead-end traversal and improves recovery latency at equal compute. Ablations removing Vane/S3* collapse these gains, indicating the contribution is structural—not cosmetic.
 
+ codex/add-rsi-vanelayer-and-s3-interrupt-to-hrm
 Note that the S3* audit depends on VaneLayer for drift statistics, so Vane must remain enabled when using S3*.
 
 To integrate with the existing training loop, instantiate `models.hrm_adapter.HRMAdapter`, which wraps `HRM` with the expected `(carry, loss, metrics, preds, all_finish)` interface.
 
+=======
 **Join our Discord Community: [https://discord.gg/sapient](https://discord.gg/sapient)**
 
 
