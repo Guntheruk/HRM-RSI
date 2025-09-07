@@ -44,7 +44,7 @@ class HRM(nn.Module):
             self.mix_reset = vanelayer_cfg.get("mix_reset", 0.35) if vanelayer_cfg else 0.35
             self.force_hi_update = s3star_cfg.get("force_hi_update", True)
 
-    def forward(self, x, lengths=None, labels=None, env_backtrack=None, step_loss_fn=None):
+    def forward(self, x, lengths=None, labels=None, env_backtrack=None, step_loss_fn=None, debug=False):
         if lengths is not None:
             T = int(lengths.max().item())
             x = x[:T]
@@ -109,7 +109,14 @@ class HRM(nn.Module):
 
                 if self.use_s3star and ema_mean is not None:
                     mean_s = s[mask].mean() if mask is not None else s.mean()
-                    if self.s3star.should_interrupt(mean_s, ema_mean, ema_std):
+                    z = (mean_s - ema_mean) / (ema_std + 1e-6)
+                    fired = self.s3star.should_interrupt(mean_s, ema_mean, ema_std)
+                    if debug:
+                        print(
+                            f"t={t} s={float(mean_s):.2f} ema={float(ema_mean):.2f} "
+                            f"std={float(ema_std):.2f} z={float(z):.2f} fired={fired}"
+                        )
+                    if fired:
                         if self.force_hi_update:
                             h_hi = self.hi(h_lo.detach(), h_hi)
                             h_hi = self.ln_hi(h_hi)
